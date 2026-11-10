@@ -55,6 +55,33 @@
   const getArticles = id => db.articles.filter(a=>a.encyclopediaId===id);
   const articleCount = id => getArticles(id).length;
   const plural = (count, singular, pluralWord) => `${count} ${count === 1 ? singular : pluralWord}`;
+  // Metrica editoriale: conteggio conservativo, riproducibile, dei lemmi non grammaticali.
+  // Non è un lemmatizzatore morfosintattico: il dato è una stima, non una certificazione linguistica.
+  const MIN_WORD_GOAL=500001;
+  const stopWords=new Set((
+    'a ad ai agli al alla alle allo all anche anziche avendo avere aveva avevano avevi avevo avra avranno avrebbe avrebbero avresti avrete avremo avro '+
+    'c ce ci cio cioe come con contro cui d da dagli dai dal dalla dalle dallo de degli dei del della delle dello dell di dopo durante '+
+    'e ed egli ella esse essi esso essa essendo eppure era eramo erano eravate eravamo eravamo eri ero essere '+
+    'fra fu furono gia gli ha hai hanno ho i il in io l la le lei li lo loro lui ma me mi mentre miei mio mia mie '+
+    'ne nei nel nella nelle nello nessuna nessuno no non noi nostra nostre nostri nostro o od oppure ora per pero poiche '+
+    'quale quali quando quanto quanti quante quella quelle quelli quello questa queste questi questo qui '+
+    'sara saranno sarebbe sarebbero saremo sarete sarò se sei senza si sia siamo siano siete sono sopra sotto sua sue suoi suo '+
+    'sul sulla sulle sugli sui sullo su sua sua su un una uno uno tra tu tua tue tuoi tuo '+
+    'vi voi vostra vostre vostri vostro che chi cosa cosi tanto talmente tale tali molto molti molte ogni '+
+    'alcuna alcuni alcune alcune alcuni altro altri altre altra alle allora almeno ancora invece dunque quindi '+
+    'tuttavia benché sebbene siccome affinché qualora nonostante pur prima poi sempre mai gia '+
+    'nel nei negli nelle nell dell dall all sull c d l m n s t '+
+    'fui foste fossi fosse fossero stato stata stati state ecco ecc'
+  ).normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/\s+/));
+  const numberIt=n=>new Intl.NumberFormat('it-IT').format(n);
+  function contentWordCount(markdown) {
+    const clean=String(markdown||'').replace(/https?:\/\/[^\s)]+/g,' ').replace(/\[\^\d+\]/g,' ');
+    const tokens=clean.match(/\p{L}+(?:['’]\p{L}+)*/gu)||[];
+    return tokens.reduce((sum,word)=>{
+      const normalized=normalize(word).replace(/^[\p{L}]+['’]/u,'');
+      return sum+(normalized.length>1&&!stopWords.has(normalized)?1:0);
+    },0);
+  }
   function initialData() {
     return {version:1, encyclopedias:[{
       id:'psicologia',name:'Psicologia',description:'Studio scientifico della mente, del comportamento e delle relazioni: dalla storia alle applicazioni.',createdAt:now(),updatedAt:now()
@@ -63,7 +90,9 @@
   function loadDb() {
     const base=initialData();
     const published=Array.isArray(window.ENCICLOPEDIA_ARTICOLI)?window.ENCICLOPEDIA_ARTICOLI:[];
-    base.articles=published.filter(a=>a&&a.id&&a.title&&a.encyclopediaId&&typeof a.content==='string')
+    const additional=Array.isArray(window.ENCICLOPEDIA_ARTICOLI_EXTRA)?window.ENCICLOPEDIA_ARTICOLI_EXTRA:[];
+    const usable=[...published,...additional].filter(a=>a&&a.id&&a.title&&a.encyclopediaId&&typeof a.content==='string');
+    base.articles=[...new Map(usable.map(a=>[a.id,a])).values()]
       .map(a=>({...a,summary:a.summary||'',path:a.path||'',sources:Array.isArray(a.sources)?a.sources:[]}));
     return base;
   }
@@ -173,6 +202,8 @@
     const canonical=new Map();
     PSYCHOLOGY_INDEX.forEach(area=>area.topics.forEach(title=>{const k=normalize(title);if(!canonical.has(k))canonical.set(k,area.name);}));
     const published=[...canonical.keys()].filter(k=>byTitle.has(k)).length;
+    const substantiveWords=articles.reduce((sum,a)=>sum+contentWordCount(a.content),0);
+    const completion=Math.min(100,100*substantiveWords/MIN_WORD_GOAL);
     const panels=PSYCHOLOGY_INDEX.map((area,i)=>{
       const ready=area.topics.filter(t=>byTitle.has(normalize(t))).length;
       const rows=area.topics.map((title,j)=>{
@@ -189,6 +220,9 @@
        <div class="toc-heading"><h2>Indice degli argomenti</h2><span>${PSYCHOLOGY_INDEX.length} aree · ${canonical.size} argomenti previsti</span></div>
        <p class="psych-intro">L'indice distingue le voci già pubblicate dagli argomenti ancora in preparazione. I capitoli vengono redatti, verificati e pubblicati progressivamente; non devi inserire tu gli appunti.</p>
        <p class="psych-overview"><strong>${published}</strong> voci pubblicate su ${canonical.size} argomenti previsti.</p>
+       <div class="psych-word-stat"><div><strong>${numberIt(substantiveWords)}</strong> parole sostanziali pubblicate <span>su un obiettivo superiore a 500.000</span></div>
+       <small>${completion.toLocaleString('it-IT',{maximumFractionDigits:2})}% · conteggio stimato, escluse parole grammaticali</small>
+       <progress class="psych-progress" max="${MIN_WORD_GOAL}" value="${Math.min(substantiveWords,MIN_WORD_GOAL)}" aria-label="Progresso delle parole sostanziali"></progress></div>
        <div class="psych-areas">${panels}</div></section>`
        +(extras.length?`<section class="toc-panel psych-extra"><div class="toc-heading"><h2>Approfondimenti aggiuntivi</h2><span>${extras.length}</span></div>${drawTree(buildTree(extras))}</section>`:'' );
   }
@@ -316,7 +350,7 @@
         ${article.path?`<p class="article-path">${esc(article.path.split('/').map(x=>x.trim()).join(' / '))}</p>`:''}
         <h1 class="article-title">${esc(article.title)}</h1>
         ${article.summary?`<p class="article-summary">${esc(article.summary)}</p>`:''}
-        <div class="article-meta"><span>Aggiornata il ${dateFmt(article.updatedAt)}</span><span class="bullet">·</span><span>${plural(article.sources.length,'fonte','fonti')}</span></div>
+        <div class="article-meta"><span>Aggiornata il ${dateFmt(article.updatedAt)}</span><span class="bullet">·</span><span>${plural(article.sources.length,'fonte','fonti')}</span><span class="bullet">·</span><span>${numberIt(contentWordCount(article.content))} parole sostanziali</span></div>
         <hr class="article-divider"><div class="article-body">${html||'<p>Contenuto in preparazione.</p>'}</div>
         ${sourcesHtml(article.sources)}
       </article>${toc.length?`<aside class="article-toc" aria-label="Indice della voce"><h3>IN QUESTA VOCE</h3>
