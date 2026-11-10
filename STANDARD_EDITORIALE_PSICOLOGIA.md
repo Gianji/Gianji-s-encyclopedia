@@ -126,7 +126,7 @@ Schede bibliografiche e documentali iniziali (non attestano lettura integrale):
 - Kurt Danziger, *Constructing the Subject: Historical Origins of Psychological Research*, Cambridge University Press, 1990, DOI 10.1017/CBO9780511524059.
 - David B. Baker (a cura di), *The Oxford Handbook of the History of Psychology: Global Perspectives*, Oxford University Press, 2012, DOI 10.1093/oxfordhb/9780195366556.001.0001.
 - Luciano Mecacci, *Manuale di storia della psicologia*, Giunti, 2008, ISBN 9788809030787.
-- Luciano Mecacci, *Storia della psicologia. Dal Novecento a oggi*, Laterza, ed. 2019, ISBN 9788859300489.
+- Luciano Mecacci, *Storia della psicologia. Dal Novecento a oggi*, Laterza, ed. 2019, ISBN 9788858136829.
 - Hermann Ebbinghaus, *Über das Gedächtnis*, 1885; traduzione inglese *Memory: A Contribution to Experimental Psychology*, 1913, archivio Classics in the History of Psychology, York University.
 - *Publication Manual of the American Psychological Association*, 7a ed., American Psychological Association, 2020, DOI 10.1037/0000165-000.
 - Programma universitario *Storia della Psicologia*, Università di Milano-Bicocca, scheda dell'insegnamento con riferimenti bibliografici.
