@@ -276,3 +276,47 @@ kbd{font-family:inherit;background:#f5f7f4;border:1px solid #e8ece7;border-radiu
 @media(max-width:380px){.create-button span:not([data-icon]){display:none}.create-button{width:37px;padding:0}.breadcrumb .current{max-width:115px}.main-content{padding-left:17px;padding-right:17px}}
 @media(prefers-reduced-motion:reduce){*,*:before,*:after{scroll-behavior:auto!important;transition:none!important;animation:none!important}}
 
+
+
+/* Psicologia — indice editoriale strutturato, consultabile anche da mobile. */
+.psych-panel{overflow:hidden}
+.psych-intro{font-size:12.7px;line-height:1.8;color:var(--muted);margin:0 0 15px;max-width:780px}
+.psych-overview{font-size:12px;color:var(--muted);padding:13px 16px;margin:0 0 19px;background:#f7faf7;border:1px solid var(--line);border-radius:9px}
+.psych-overview strong{color:var(--ink);font-weight:730}
+.psych-areas{border:1px solid var(--line);border-radius:11px;overflow:hidden;background:#fff}
+.psych-area+.psych-area{border-top:1px solid var(--line)}
+.psych-area>summary{list-style:none;display:flex;align-items:center;gap:13px;padding:16px 15px;cursor:pointer;background:#fff;color:var(--ink)}
+.psych-area>summary::-webkit-details-marker{display:none}
+.psych-area>summary:hover{background:#f8faf8}
+.psych-area>summary:focus-visible{outline:3px solid #85b5a8;outline-offset:-3px}
+.psych-area>summary strong{font-size:12.1px;line-height:1.5;letter-spacing:.01em;font-weight:700;flex:1;min-width:0}
+.psych-area-number{font:650 11px ui-monospace,SFMono-Regular,Consolas,monospace;color:var(--accent);flex-shrink:0}
+.psych-area-progress{font-size:11px;color:#94a29a;white-space:nowrap;font-variant-numeric:tabular-nums}
+.psych-area>summary svg{width:15px;height:15px;color:#9aa9a0;transition:transform .18s;flex-shrink:0}
+.psych-area[open]>summary svg{transform:rotate(90deg)}
+.psych-topics{list-style:none;margin:0;padding:0 0 8px 0;background:#fdfefd;border-top:1px solid var(--line)}
+.psych-topics li{margin:0}
+.psych-topic{display:flex;align-items:center;gap:11px;padding:12px 18px 12px 37px;min-height:43px;border-bottom:1px solid #f1f4f1;color:var(--ink);transition:background .12s}
+.psych-topic:hover,.psych-topic:focus-visible{background:#f0f6f1;outline-offset:-2px}
+.psych-topics li:last-child .psych-topic{border-bottom:0}
+.psych-topic-number{font:550 10.8px ui-monospace,SFMono-Regular,Consolas,monospace;color:#a0aba3;min-width:33px;flex-shrink:0}
+.psych-topic-title{font-size:12.4px;line-height:1.55;flex:1;min-width:0}
+.psych-topic-status{font-size:10.5px;color:#9ba89e;white-space:nowrap}
+.psych-topic.is-written .psych-topic-title{font-weight:650}
+.psych-topic.is-written .psych-topic-status{color:var(--accent)}
+.psych-topic svg{width:13px;height:13px;color:#b0bcb2;flex-shrink:0}
+.psych-extra{margin-top:30px}
+@media(max-width:760px){
+  .psych-panel .toc-heading{align-items:flex-start;gap:6px;flex-wrap:wrap}
+  .psych-panel .toc-heading span{white-space:normal}
+  .psych-area>summary{padding:14px 12px;gap:9px}
+  .psych-area>summary strong{font-size:11.8px}
+  .psych-topic{padding:11px 11px 11px 16px;gap:8px}
+  .psych-topic-number{min-width:31px}
+  .psych-topic-title{font-size:12px}
+  .psych-topic-status{font-size:10px}
+}
+@media(max-width:380px){
+  .psych-topic-status{display:none}
+  .psych-area-progress{font-size:10px}
+}
