@@ -50,7 +50,7 @@ I budget seguenti sono **obiettivi redazionali per contenuti originali ancora da
 | 19 | Esclusioni, colonialismo, eugenetica, genere, credenziali, uso sociale dei test | 2.900 |
 | 20 | Revisione delle linee di continuità e discontinuità; cronologia documentata | 2.600 |
 
-**Totale indicativo del piano: 54.900 parole sostanziali.** Non è un limite da raggiungere forzatamente. Ogni ampliamento richiede fonti puntuali e nuovi dati, interpretazioni o confronti; se un tema appartiene principalmente a un'altra monografia, sostituire con rimando.
+**Totale indicativo del piano: 53.900 parole sostanziali.** Non è un limite da raggiungere forzatamente. Ogni ampliamento richiede fonti puntuali e nuovi dati, interpretazioni o confronti; se un tema appartiene principalmente a un'altra monografia, sostituire con rimando.
 
 ## Conflitti di competenza e rimandi canonici
 
