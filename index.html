@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#fafbf9">
+  <meta name="description" content="ENCICLOPEDIA — Un archivio personale della conoscenza, ordinato e interconnesso.">
+  <title>ENCICLOPEDIA — La tua biblioteca</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="app" class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="Navigazione principale">
+      <a class="brand" href="#/" aria-label="ENCICLOPEDIA, torna alla biblioteca">
+        <span class="brand-mark">E<span class="brand-dot">.</span></span>
+        <span class="brand-lines"><strong>ENCICLOPEDIA</strong><small>Archivio personale</small></span>
+      </a>
+      <div class="sidebar-section-label">LA TUA BIBLIOTECA</div>
+      <nav id="sidebar-nav" class="sidebar-nav" aria-label="Enciclopedie"></nav>
+      <div class="sidebar-spacer"></div>
+      <div class="sidebar-footer">
+        <div class="storage-note"><span class="storage-icon" aria-hidden="true">●</span> Salvato su questo dispositivo</div>
+        <button id="archive-button" class="subtle-action" type="button" data-action="open-archive" aria-label="Gestione archivio">
+          <span data-icon="archive"></span> Gestione archivio <span class="chevron-right">›</span>
+        </button>
+      </div>
+    </aside>
+    <div class="mobile-shade" id="mobile-shade" hidden></div>
+    <div class="work-area">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="icon-button mobile-menu-button" type="button" data-action="toggle-sidebar" aria-label="Apri navigazione" aria-controls="sidebar" aria-expanded="false"><span data-icon="menu"></span></button>
+          <div class="breadcrumb" id="breadcrumb" aria-label="Percorso di navigazione"></div>
+        </div>
+        <div class="topbar-actions">
+          <button type="button" id="search-trigger" class="search-trigger" data-action="open-search" aria-label="Cerca nelle enciclopedie"><span data-icon="search"></span><span class="search-placeholder">Cerca nelle voci...</span><kbd>⌘ K</kbd></button>
+          <div class="new-wrap">
+            <button class="primary-button create-button" id="new-button" type="button" data-action="toggle-new" aria-haspopup="menu" aria-expanded="false"><span data-icon="plus"></span><span>Nuovo</span></button>
+            <div id="new-menu" class="dropdown" role="menu" hidden>
+              <button type="button" role="menuitem" data-action="create-encyclopedia"><span data-icon="book"></span><span>Enciclopedia</span></button>
+              <button type="button" role="menuitem" data-action="create-article"><span data-icon="file-plus"></span><span>Voce</span></button>
+            </div>
+          </div>
+        </div>
+      </header>
+      <main id="main" class="main-content" tabindex="-1"></main>
+    </div>
+  </div>
+  <div id="overlay-root"></div>
+  <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+  <input type="file" id="import-input" accept=".json,application/json" hidden>
+  <script src="app.js" defer></script>
+</body>
+</html>
