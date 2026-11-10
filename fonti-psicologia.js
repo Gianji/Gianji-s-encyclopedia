@@ -52,7 +52,7 @@ window.PSICOLOGIA_REPERTORIO_FONTI = [
     "year": "2019",
     "title": "Storia della psicologia. Dal Novecento a oggi",
     "publisher": "Editori Laterza",
-    "identifier": "ISBN 9788859300489 (edizione cartacea riportata nella scheda 2019)",
+    "identifier": "ISBN 9788858136829 (scheda editoriale consultata)",
     "url": "https://www.laterza.it/scheda-libro/?isbn=9788858136829",
     "verification": "Metadati controllati sulla scheda editoriale; testo integrale non verificato"
   },
