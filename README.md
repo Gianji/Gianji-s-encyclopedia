@@ -13,7 +13,7 @@ Il sito serve per **consultare** i materiali pubblicati: biblioteca, indici, cap
 - `psicologia-data.js`: indice editoriale pianificato dell'enciclopedia Psicologia, con 11 aree disciplinari e oltre 300 argomenti distinti.
 - `psicologia-introduzione.js`: panoramica autonoma su oggetto, metodi e campi della psicologia.
 - `psicologia-origini.js`: quattro ulteriori voci storiche, caricate dopo la base, con ID e fonti indipendenti.
-- `psicologia-storia-estesa.js`: revisione analitica del capitolo generale, con 45 sezioni e bibliografia ampliata.
+- `psicologia-storia-estesa.js`: revisione analitica del capitolo generale, con 46 sezioni e bibliografia ampliata.
 - `psicologia-storia-antichita-globale.js`, `psicologia-storia-greco-romana.js`, `psicologia-storia-medievale.js`, `psicologia-storia-eta-moderna.js`, `psicologia-storia-ottocento.js`: monografie storiche integrative con rimandi all'articolo cronologico.
 - `contenuti.js`: **testi effettivamente pubblicati** con ID stabili, titolo, percorso, sintesi, corpo in formato Markdown, fonti e data di aggiornamento.
 - `app.js`: navigazione, ricerca, resa dei capitoli e bibliografia in modalità lettura.
@@ -60,6 +60,8 @@ Le nuove voci mantengono il formato di appunti di studio, con struttura autonoma
 
 ## Ampliamento storico del 10 novembre 2026
 
-Il capitolo "Storia della Psicologia" non è più una voce di circa 1.500 parole: il testo principale comprende oltre 11.000 parole complessive e 45 sezioni, con cinque monografie integrative di circa 2.000-2.700 parole ciascuna. L'insieme della biblioteca supera 31.000 parole complessive considerando i corpi degli articoli; il conteggio delle **parole sostanziali** è fornito direttamente dal sito secondo il metodo descritto sopra, senza confondere parole totali e parole lessicali stimate.
+Il capitolo "Storia della Psicologia" non è più una voce di circa 1.500 parole: il testo principale comprende oltre 12.500 parole complessive e 46 sezioni, con cinque monografie integrative di circa 2.000-2.700 parole ciascuna. L'insieme della biblioteca supera 32.000 parole complessive considerando i corpi degli articoli; il conteggio delle **parole sostanziali** è fornito direttamente dal sito secondo il metodo descritto sopra, senza confondere parole totali e parole lessicali stimate.
 
 Le pubblicazioni sono **prime stesure estese**, non un completamento del progetto né una prova di verifica esaustiva di ogni dettaglio storiografico. Le future integrazioni devono migliorare profondità, copertura geografica, repertori di fonti primarie, analisi biografiche e discussioni specialistiche, evitando ripetizioni arbitrarie.
+
+**Verifica editoriale (snapshot, 10 novembre 2026):** 12 voci pubblicate; 11 aree, 329 argomenti distinti in indice; 32.707 parole complessive nei corpi degli articoli e circa **20.163 parole sostanziali stimate** con l'algoritmo del sito. La ricostruzione storica principale contiene 12.564 parole complessive; sommando le cinque monografie integrate si ottengono 24.790 parole complessive per l'approfondimento storico. Le cifre evolvono a ogni pubblicazione e non equivalgono a un'attestazione di esaustività.
