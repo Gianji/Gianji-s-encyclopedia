@@ -57,7 +57,9 @@
   const plural = (count, singular, pluralWord) => `${count} ${count === 1 ? singular : pluralWord}`;
   // Metrica editoriale: conteggio conservativo, riproducibile, dei lemmi non grammaticali.
   // Non è un lemmatizzatore morfosintattico: il dato è una stima, non una certificazione linguistica.
-  const MIN_WORD_GOAL=500001;
+  const VOLUME_MIN_WORDS=20000;
+  const VOLUME_TARGET_WORDS=40000;
+  const MIN_WORD_GOAL=new Set(PSYCHOLOGY_INDEX.flatMap(area=>area.topics.map(normalize))).size * VOLUME_TARGET_WORDS;
   const stopWords=new Set((
     'a ad ai agli al alla alle allo all anche anziche avendo avere aveva avevano avevi avevo avra avranno avrebbe avrebbero avresti avrete avremo avro '+
     'c ce ci cio cioe come con contro cui d da dagli dai dal dalla dalle dallo de degli dei del della delle dello dell di dopo durante '+
@@ -75,13 +77,21 @@
   ).normalize('NFD').replace(/[\u0300-\u036f]/g,'').split(/\s+/));
   const numberIt=n=>new Intl.NumberFormat('it-IT').format(n);
   function contentWordCount(markdown) {
-    const clean=String(markdown||'').replace(/https?:\/\/[^\s)]+/g,' ').replace(/\[\^\d+\]/g,' ');
+    const body=String(markdown||'').split(/^#{1,4}\s+(?:bibliografia|sitografia|fonti(?:\s+e\s+riferimenti)?|riferimenti\s+bibliografici|bibliography|references)\s*$/im)[0];
+    const clean=body.replace(/https?:\/\/[^\s)]+/g,' ').replace(/\[\^\d+\]/g,' ');
     const tokens=clean.match(/\p{L}+(?:['’]\p{L}+)*/gu)||[];
     return tokens.reduce((sum,word)=>{
       const normalized=normalize(word).replace(/^[\p{L}]+['’]/u,'');
       return sum+(normalized.length>1&&!stopWords.has(normalized)?1:0);
     },0);
   }
+  function isVolumeComplete(article) {
+    // La lunghezza, da sola, non certifica rigore scientifico o unicità dei contenuti.
+    return contentWordCount(article.content)>=VOLUME_TARGET_WORDS && article.editorialStatus==='complete'
+      && article.factChecked===true && article.duplicationAudit===true
+      && article.wordCountCertified===true && article.bibliographyAudit===true;
+  }
+  const countBookStatus=articles=>articles.filter(isVolumeComplete).length;
   function initialData() {
     return {version:1, encyclopedias:[{
       id:'psicologia',name:'Psicologia',description:'Studio scientifico della mente, del comportamento e delle relazioni: dalla storia alle applicazioni.',createdAt:now(),updatedAt:now()
@@ -202,26 +212,28 @@
     const canonical=new Map();
     PSYCHOLOGY_INDEX.forEach(area=>area.topics.forEach(title=>{const k=normalize(title);if(!canonical.has(k))canonical.set(k,area.name);}));
     const published=[...canonical.keys()].filter(k=>byTitle.has(k)).length;
+    const completed=countBookStatus(articles);
     const substantiveWords=articles.reduce((sum,a)=>sum+contentWordCount(a.content),0);
     const completion=Math.min(100,100*substantiveWords/MIN_WORD_GOAL);
     const panels=PSYCHOLOGY_INDEX.map((area,i)=>{
       const ready=area.topics.filter(t=>byTitle.has(normalize(t))).length;
+      const done=area.topics.filter(t=>{const a=byTitle.get(normalize(t));return a&&isVolumeComplete(a);}).length;
       const rows=area.topics.map((title,j)=>{
         const article=byTitle.get(normalize(title));
         const prefix=`<span class="psych-topic-number">${i+1}.${j+1}</span><span class="psych-topic-title">${esc(title)}</span>`;
         return article
-          ?`<li><a class="psych-topic is-written" href="${linkForArticle(article.id)}">${prefix}<span class="psych-topic-status">Leggi</span>${ico('chevron')}</a></li>`
+          ?`<li><a class="psych-topic is-written" href="${linkForArticle(article.id)}">${prefix}<span class="psych-topic-status">${isVolumeComplete(article)?"Completo":"Bozza"}</span>${ico('chevron')}</a></li>`
           :`<li><div class="psych-topic is-pending" aria-label="${esc(title)}: in preparazione">${prefix}<span class="psych-topic-status">In preparazione</span></div></li>`;
       }).join('');
-      return `<details class="psych-area" ${i===0?'open':''}><summary><span class="psych-area-number">${String(i+1).padStart(2,'0')}</span><strong>${esc(area.name)}</strong><span class="psych-area-progress">${ready} / ${area.topics.length}</span>${ico('chevron')}</summary><ol class="psych-topics">${rows}</ol></details>`;
+      return `<details class="psych-area" ${i===0?'open':''}><summary><span class="psych-area-number">${String(i+1).padStart(2,'0')}</span><strong>${esc(area.name)}</strong><span class="psych-area-progress">${done} completi · ${ready-done} bozze</span>${ico('chevron')}</summary><ol class="psych-topics">${rows}</ol></details>`;
     }).join('');
     const extras=articles.filter(a=>!canonical.has(normalize(a.title)));
     return `<section class="toc-panel psych-panel" aria-label="Indice di Psicologia">
        <div class="toc-heading"><h2>Indice degli argomenti</h2><span>${PSYCHOLOGY_INDEX.length} aree · ${canonical.size} argomenti previsti</span></div>
-       <p class="psych-intro">L'indice distingue le voci già pubblicate dagli argomenti ancora in preparazione. I capitoli vengono redatti, verificati e pubblicati progressivamente; non devi inserire tu gli appunti.</p>
-       <p class="psych-overview"><strong>${published}</strong> voci pubblicate su ${canonical.size} argomenti previsti.</p>
-       <div class="psych-word-stat"><div><strong>${numberIt(substantiveWords)}</strong> parole sostanziali pubblicate <span>su un obiettivo superiore a 500.000</span></div>
-       <small>${completion.toLocaleString('it-IT',{maximumFractionDigits:2})}% · conteggio stimato, escluse parole grammaticali</small>
+       <p class="psych-intro">Ogni capitolo è un volume autonomo: minimo 20.000 parole sostanziali, obiettivo editoriale almeno 40.000. I testi disponibili prima della verifica restano bozze consultabili; non devi fornire tu gli appunti.</p>
+       <p class="psych-overview"><strong>${published}</strong> bozze consultabili · <strong>${completed}</strong> volumi completi verificati · ${canonical.size} volumi pianificati.</p>
+       <div class="psych-word-stat"><div><strong>${numberIt(substantiveWords)}</strong> parole sostanziali stimate nei testi consultabili <span>· obiettivo teorico ${numberIt(MIN_WORD_GOAL)} (${canonical.size} volumi × ${numberIt(VOLUME_TARGET_WORDS)})</span></div>
+       <small>${completion.toLocaleString('it-IT',{maximumFractionDigits:2})}% del piano indicativo · bibliografie e sitografie escluse · conteggio automatico non certificato</small>
        <progress class="psych-progress" max="${MIN_WORD_GOAL}" value="${Math.min(substantiveWords,MIN_WORD_GOAL)}" aria-label="Progresso delle parole sostanziali"></progress></div>
        <div class="psych-areas">${panels}</div></section>`
        +(extras.length?`<section class="toc-panel psych-extra"><div class="toc-heading"><h2>Approfondimenti aggiuntivi</h2><span>${extras.length}</span></div>${drawTree(buildTree(extras))}</section>`:'' );
@@ -336,12 +348,29 @@
   }
   function sourcesHtml(sources) {
     if(!sources.length)return '';
-    return `<section class="sources-section" aria-label="Fonti"><h2>Fonti e riferimenti</h2>
+    return `<section class="sources-section" aria-label="Fonti"><h2>Fonti online e riferimenti puntuali</h2>
       <ol class="sources-list">${sources.map((s,i)=>{
         const url=safeUrl(s.trim());
         return `<li id="fonte-${i+1}">${url?`<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">${esc(s)}</a>`:esc(s)}</li>`;
       }).join('')}</ol></section>`;
   }
+
+  // Repertorio distinto dalle note [^n]: le schede di un libro non equivalgono
+  // alla consultazione integrale o alla verifica di un'affermazione specifica.
+  function researchBibliographyHtml(article) {
+    const registry=Array.isArray(window.PSICOLOGIA_REPERTORIO_FONTI)?window.PSICOLOGIA_REPERTORIO_FONTI:[];
+    const ids=new Set(Array.isArray(article.researchSourceIds)?article.researchSourceIds:[]);
+    const refs=registry.filter(ref=>ids.has(ref.id));
+    if(!refs.length)return '';
+    const items=refs.map(ref=>{
+      const url=safeUrl(ref.url);
+      const source=esc([ref.author,ref.year,ref.title,ref.edition,ref.publisher,ref.identifier].filter(Boolean).join(' · '));
+      const open=url?'<a href="'+esc(url)+'" target="_blank" rel="noopener noreferrer">Scheda e disponibilità</a>':'';
+      return '<li><strong>'+esc(ref.kind)+'</strong><p>'+source+'</p><small>'+esc(ref.verification)+'</small> '+open+'</li>';
+    }).join('');
+    return '<section class="sources-section research-bibliography" aria-label="Bibliografia di ricerca"><h2>Bibliografia e programmi di ricerca</h2><p class="bibliography-disclaimer">Metadati verificati presso editori, archivi o università. La presenza in questo repertorio non significa che l’opera sia stata letta integralmente né che sostenga, senza una verifica puntuale, tutte le affermazioni del capitolo. Questo apparato è escluso dal conteggio delle parole.</p><ol class="research-bib-list">'+items+'</ol></section>';
+  }
+
   function renderArticle(article) {
     const en=getEn(article.encyclopediaId),{html,toc}=renderMarkdown(article.content,article.encyclopediaId);
     bread([{label:'Biblioteca',href:'#/'},{label:en?.name||'Enciclopedia',href:`#/enciclopedia/${encodeURIComponent(article.encyclopediaId)}`},{label:article.title}]);
@@ -350,9 +379,11 @@
         ${article.path?`<p class="article-path">${esc(article.path.split('/').map(x=>x.trim()).join(' / '))}</p>`:''}
         <h1 class="article-title">${esc(article.title)}</h1>
         ${article.summary?`<p class="article-summary">${esc(article.summary)}</p>`:''}
-        <div class="article-meta"><span>Aggiornata il ${dateFmt(article.updatedAt)}</span><span class="bullet">·</span><span>${plural(article.sources.length,'fonte','fonti')}</span><span class="bullet">·</span><span>${numberIt(contentWordCount(article.content))} parole sostanziali</span></div>
+        <p class="volume-stage">${isVolumeComplete(article)?"Volume completo e verificato":"Bozza consultabile · in redazione e verifica"}</p>
+        <div class="article-meta"><span>Aggiornata il ${dateFmt(article.updatedAt)}</span><span class="bullet">·</span><span>${plural(article.sources.length,'fonte','fonti')}</span><span class="bullet">·</span><span>${numberIt(contentWordCount(article.content))} parole sostanziali stimate (min. ${numberIt(VOLUME_MIN_WORDS)}, obiettivo ${numberIt(VOLUME_TARGET_WORDS)}; bibliografia esclusa)</span></div>
         <hr class="article-divider"><div class="article-body">${html||'<p>Contenuto in preparazione.</p>'}</div>
         ${sourcesHtml(article.sources)}
+        ${researchBibliographyHtml(article)}
       </article>${toc.length?`<aside class="article-toc" aria-label="Indice della voce"><h3>IN QUESTA VOCE</h3>
       ${toc.map(item=>`<a href="#" data-scroll="${esc(item.id)}" class="level-${item.level}">${esc(item.text)}</a>`).join('')}</aside>`:''}</div>`;
   }
