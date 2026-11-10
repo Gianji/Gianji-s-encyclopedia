@@ -13,6 +13,8 @@ Il sito serve per **consultare** i materiali pubblicati: biblioteca, indici, cap
 - `psicologia-data.js`: indice editoriale pianificato dell'enciclopedia Psicologia, con 11 aree disciplinari e oltre 300 argomenti distinti.
 - `psicologia-introduzione.js`: panoramica autonoma su oggetto, metodi e campi della psicologia.
 - `psicologia-origini.js`: quattro ulteriori voci storiche, caricate dopo la base, con ID e fonti indipendenti.
+- `psicologia-storia-estesa.js`: revisione analitica del capitolo generale, con 45 sezioni e bibliografia ampliata.
+- `psicologia-storia-antichita-globale.js`, `psicologia-storia-greco-romana.js`, `psicologia-storia-medievale.js`, `psicologia-storia-eta-moderna.js`, `psicologia-storia-ottocento.js`: monografie storiche integrative con rimandi all'articolo cronologico.
 - `contenuti.js`: **testi effettivamente pubblicati** con ID stabili, titolo, percorso, sintesi, corpo in formato Markdown, fonti e data di aggiornamento.
 - `app.js`: navigazione, ricerca, resa dei capitoli e bibliografia in modalità lettura.
 - `index.html` / `styles.css`: struttura e design responsive.
@@ -28,6 +30,11 @@ La presenza di un argomento nell'indice **non** implica che sia stato scritto, v
 5. *Funzionalismo*.
 6. *Gestalt e Psicologia della Forma*.
 7. *Comportamentismo Classico e Neocomportamentismo*.
+8. *Concezioni della mente nelle civiltà antiche: India, Cina e Vicino Oriente*.
+9. *La psicologia nella Grecia antica e a Roma: anima, percezione, memoria e passioni*.
+10. *La mente nel Medioevo e nel Rinascimento: tradizioni arabe, scolastica e umanesimo*.
+11. *Mente, corpo e conoscenza tra Seicento e Illuminismo*.
+12. *L'Ottocento e la nascita della psicologia scientifica: strumenti, laboratori e controversie*.
 
 Si tratta di **prime stesure**, non di capitoli dichiarati esaustivi. Il progetto enciclopedico richiede ampliamenti, verifiche ulteriori e pubblicazioni progressive.
 
@@ -50,3 +57,9 @@ La prima enciclopedia è **Psicologia** e la soglia di completamento programmata
 Il sito mostra un indicatore calcolato dai **soli corpi delle voci effettivamente pubblicate**. Il conteggio elimina URL e segnaposto di citazione e scarta, tramite un insieme dichiarato nel codice di `app.js`, articoli, preposizioni, congiunzioni, pronomi e altre parole grammaticali comuni. È una **stima trasparente e riproducibile**, non un'analisi morfosintattica infallibile: locuzioni, omografie, forme flesse e prestiti possono produrre scarti. Nessun numero pianificato viene contato come testo già scritto. Questa metrica non sostituisce revisione scientifica, approfondimento o verifica delle fonti.
 
 Le nuove voci mantengono il formato di appunti di studio, con struttura autonoma, precisazioni sulle controversie, termini, esempi, fonti ed espliciti rimandi; le prime stesure non vanno presentate come trattazioni definitive.
+
+## Ampliamento storico del 10 novembre 2026
+
+Il capitolo "Storia della Psicologia" non è più una voce di circa 1.500 parole: il testo principale comprende oltre 11.000 parole complessive e 45 sezioni, con cinque monografie integrative di circa 2.000-2.700 parole ciascuna. L'insieme della biblioteca supera 31.000 parole complessive considerando i corpi degli articoli; il conteggio delle **parole sostanziali** è fornito direttamente dal sito secondo il metodo descritto sopra, senza confondere parole totali e parole lessicali stimate.
+
+Le pubblicazioni sono **prime stesure estese**, non un completamento del progetto né una prova di verifica esaustiva di ogni dettaglio storiografico. Le future integrazioni devono migliorare profondità, copertura geografica, repertori di fonti primarie, analisi biografiche e discussioni specialistiche, evitando ripetizioni arbitrarie.
