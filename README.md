@@ -10,7 +10,8 @@ Il sito serve per **consultare** i materiali pubblicati: biblioteca, indici, cap
 
 ## Organizzazione dei contenuti
 
-- `psicologia-data.js`: indice editoriale pianificato dell'enciclopedia Psicologia, con 11 aree disciplinari e 322 argomenti distinti.
+- `psicologia-data.js`: indice editoriale pianificato dell'enciclopedia Psicologia, con 11 aree disciplinari e oltre 300 argomenti distinti.
+- `psicologia-origini.js`: quattro ulteriori voci storiche, caricate dopo la base, con ID e fonti indipendenti.
 - `contenuti.js`: **testi effettivamente pubblicati** con ID stabili, titolo, percorso, sintesi, corpo in formato Markdown, fonti e data di aggiornamento.
 - `app.js`: navigazione, ricerca, resa dei capitoli e bibliografia in modalità lettura.
 - `index.html` / `styles.css`: struttura e design responsive.
@@ -21,6 +22,10 @@ La presenza di un argomento nell'indice **non** implica che sia stato scritto, v
 
 1. *Storia della Psicologia: dalle Origini Filosofiche alla Nascita della Scienza*.
 2. *Wundt e la Fondazione della Psicologia Sperimentale*.
+3. *Strutturalismo*.
+4. *Funzionalismo*.
+5. *Gestalt e Psicologia della Forma*.
+6. *Comportamentismo Classico e Neocomportamentismo*.
 
 Si tratta di **prime stesure**, non di capitoli dichiarati esaustivi. Il progetto enciclopedico richiede ampliamenti, verifiche ulteriori e pubblicazioni progressive.
 
@@ -35,3 +40,11 @@ GitHub Pages: https://gianji.github.io/Gianji-s-encyclopedia/
 Branch di pubblicazione: `main`, cartella `/(root)`.
 
 Non occorrono login, server applicativo, database o `localStorage` per leggere i contenuti. Le modifiche al sito e ai capitoli avvengono nel repository.
+
+## Obiettivo editoriale e contatore (10 novembre 2026)
+
+La prima enciclopedia è **Psicologia** e la soglia di completamento programmata è **oltre 500.000 parole sostanziali**: 500.001 è il minimo numerico, non una stima delle parole già redatte. L'indice costituisce il piano, non il risultato. Per raggiungere tale scala bisognerà ampliare profondamente le voci, curare bibliografia e collegamenti e pubblicare nuovi capitoli verificati.
+
+Il sito mostra un indicatore calcolato dai **soli corpi delle voci effettivamente pubblicate**. Il conteggio elimina URL e segnaposto di citazione e scarta, tramite un insieme dichiarato nel codice di `app.js`, articoli, preposizioni, congiunzioni, pronomi e altre parole grammaticali comuni. È una **stima trasparente e riproducibile**, non un'analisi morfosintattica infallibile: locuzioni, omografie, forme flesse e prestiti possono produrre scarti. Nessun numero pianificato viene contato come testo già scritto. Questa metrica non sostituisce revisione scientifica, approfondimento o verifica delle fonti.
+
+Le nuove voci mantengono il formato di appunti di studio, con struttura autonoma, precisazioni sulle controversie, termini, esempi, fonti ed espliciti rimandi; le prime stesure non vanno presentate come trattazioni definitive.
