@@ -3,6 +3,7 @@ window.PSICOLOGIA_INDICE = [
   {
     "name": "FONDAMENTI STORICI E TEORICI DELLA PSICOLOGIA",
     "topics": [
+      "Psicologia: Oggetto, Metodi e Campi di Studio",
       "Storia della Psicologia: dalle Origini Filosofiche alla Nascita della Scienza",
       "Wundt e la Fondazione della Psicologia Sperimentale",
       "Strutturalismo",
@@ -165,7 +166,7 @@ window.PSICOLOGIA_INDICE = [
       "Relazioni di Coppia e Dinamiche Familiari",
       "Psicologia della Comunicazione",
       "Comunicazione Digitale e Social Media",
-      "Psicologia del Marketing e del Consum",
+      "Psicologia del Marketing e del Consumo",
       "Psicologia Culturale e Antropologia Psicologica",
       "Psicologia della Comunità",
       "Psicologia del Volontariato e del No-Profit",
@@ -362,7 +363,7 @@ window.PSICOLOGIA_INDICE = [
       "Cartella Clinica e Fascicolo",
       "Privacy e GDPR in Ambito Psicologico",
       "Telepsicologia e Psicologia Online",
-      "Supervisione Clinica",
+      "Intervisione e Consultazione Professionale tra Pari",
       "Formazione Continua ed ECM",
       "Progettazione di Interventi Psicologici",
       "Valutazione di Progetto e Impatto",
