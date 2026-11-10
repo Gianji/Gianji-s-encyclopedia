@@ -320,3 +320,10 @@ kbd{font-family:inherit;background:#f5f7f4;border:1px solid #e8ece7;border-radiu
   .psych-topic-status{display:none}
   .psych-area-progress{font-size:10px}
 }
+
+/* Modalità lettura: le righe pianificate non sono link o azioni. */
+.psych-topic.is-pending{color:var(--muted);cursor:default;}
+.psych-topic.is-pending:hover{background:transparent}
+.search-result.is-pending{cursor:default;opacity:.67}
+.search-result.is-pending:hover{background:transparent}
+.article-body .missing-link{color:var(--muted);border-bottom:1px dotted var(--line-strong);cursor:default}
