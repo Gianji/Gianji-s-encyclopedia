@@ -371,8 +371,7 @@
       location.hash='#/';
       renderHome();
     }
-    editor=null;
-    closeMenus();hydrateIcons($('#main'));
+closeMenus();hydrateIcons($('#main'));
     const key=`${route.type}/${route.id}`;
     if(lastRouteKey!==key){lastRouteKey=key;window.scrollTo({top:0,behavior:'instant'});}
     if(route.section)requestAnimationFrame(()=>jumpToSection(route.section));
