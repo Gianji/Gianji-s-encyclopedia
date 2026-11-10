@@ -1,6 +1,4 @@
-/* ENCICLOPEDIA — v1.0.0
- * App statica, nessuna dipendenza. Dati conservati localmente nel browser.
- */
+/* ENCICLOPEDIA — lettura pubblica. Contenuti statici versionati su GitHub. */
 (() => {
   'use strict';
 
@@ -67,16 +65,11 @@
   function readLocal(key) {try{return localStorage.getItem(key);}catch{return null;}}
   function writeLocal(key, value) {try{localStorage.setItem(key,value);return true;}catch{return false;}}
   function loadDb() {
-    const raw = readLocal(STORE);
-    if (raw) {try {const d=JSON.parse(raw);if(d&&d.version===1&&Array.isArray(d.encyclopedias)&&Array.isArray(d.articles)) {
-      const psych=d.encyclopedias.find(e=>e.id==='psicologia');
-      if(psych && psych.description==='Uno spazio da costruire: fondamenti, scuole, autori e concetti.') {
-        psych.description='Studio scientifico della mente, del comportamento e delle relazioni: dalla storia alle applicazioni.';
-        writeLocal(STORE,JSON.stringify(d));
-      }
-      return d;
-    }}catch{}}
-    const initial=initialData();writeLocal(STORE,JSON.stringify(initial));return initial;
+    const base=initialData();
+    const published=Array.isArray(window.ENCICLOPEDIA_ARTICOLI)?window.ENCICLOPEDIA_ARTICOLI:[];
+    base.articles=published.filter(a=>a&&a.id&&a.title&&a.encyclopediaId&&typeof a.content==='string')
+      .map(a=>({...a,summary:a.summary||'',path:a.path||'',sources:Array.isArray(a.sources)?a.sources:[]}));
+    return base;
   }
   let db = loadDb();
   let editor = null;
@@ -85,16 +78,15 @@
   let toastTimer = 0;
   let lastRouteKey = '';
 
-  function commit(next) {
-    if (!writeLocal(STORE,JSON.stringify(next))) {toast('Salvataggio non riuscito: memoria del browser non disponibile.');return false;}
-    db=next;render();return true;
-  }
+  function commit() { return false; }
+
   function closeMenus() {
-    $('#new-menu').hidden = true;
-    $('#new-button').setAttribute('aria-expanded','false');
-    const context = $('#context-menu');
+    const menu=$('#new-menu'),button=$('#new-button'),context=$('#context-menu');
+    if(menu)menu.hidden=true;
+    if(button)button.setAttribute('aria-expanded','false');
     if(context)context.hidden=true;
   }
+
   function toast(msg) {
     const root=$('#toast-root');
     root.innerHTML=`<div class="toast">${ico('check')}<span>${esc(msg)}</span></div>`;
@@ -142,25 +134,22 @@
   function renderHome() {
     bread([{label:'Biblioteca'}]);
     const libraries=[...db.encyclopedias].sort((a,b)=>sortIt(a.name,b.name));
-    const recent=[...db.articles].sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,6);
-    const main=$('#main');
-    main.innerHTML=`<div class="hero"><p class="eyebrow">LA TUA BIBLIOTECA DEL SAPERE</p>
-        <h1 class="display-title">Ogni conoscenza,<br>al suo posto.</h1>
-        <p class="description">Enciclopedie indipendenti, voci ordinate per argomento e collegamenti diretti tra i concetti. Tutto in un unico spazio, senza distrazioni.</p>
-        ${!libraries.length?`<div class="hero-actions"><button class="primary-button" data-action="create-encyclopedia">${ico('plus')}Crea enciclopedia</button></div>`:''}
-      </div>
-      <section aria-labelledby="libraries-title"><div class="section-heading"><h2 id="libraries-title">Enciclopedie</h2><small>${plural(libraries.length,'collezione','collezioni')}</small></div>
-      ${libraries.length?`<div class="library-grid">${libraries.map(en=>`<a class="library-card" href="#/enciclopedia/${encodeURIComponent(en.id)}">
-        <span class="library-icon">${ico('book')}</span><span class="library-card-title">${esc(en.name)}</span>
-        <span class="library-card-subtitle">${esc(en.description||'Una collezione di conoscenze.')}</span>
-        <span class="library-card-bottom">${en.id==='psicologia'&&PSYCHOLOGY_INDEX.length?plural(psychologyPlanCount(),'argomento','argomenti'):plural(articleCount(en.id),'voce','voci')}${ico('corner')}</span>
-      </a>`).join('')}</div>`:emptyBlock('Inizia da una materia','Crea la tua prima enciclopedia. Potrai aggiungere argomenti, capitoli e voci in qualsiasi momento.','Crea enciclopedia','create-encyclopedia','book')}
-      </section>
-      ${recent.length?`<section class="recent-section" aria-labelledby="recent-title"><div class="section-heading"><h2 id="recent-title">Ultime modifiche</h2><small>${plural(db.articles.length,'voce totale','voci totali')}</small></div>
-       <div class="recent-list">${recent.map(a=>`<a href="${linkForArticle(a.id)}" class="recent-row"><span class="recent-icon">${ico('file')}</span>
-         <span class="recent-details"><strong>${esc(a.title)}</strong><small>${esc(getEn(a.encyclopediaId)?.name||'')} ${a.path?' · '+esc(a.path):''}</small></span>
-         <span class="recent-date">${dateFmt(a.updatedAt)}</span></a>`).join('')}</div></section>`:''}`;
+    const recent=[...db.articles].sort((a,b)=>new Date(b.updatedAt)-new Date(a.updatedAt)).slice(0,7);
+    $('#main').innerHTML=`<div class="hero"><p class="eyebrow">BIBLIOTECA DEL SAPERE</p>
+       <h1 class="display-title">Ogni conoscenza,<br>al suo posto.</h1>
+       <p class="description">Enciclopedie costruite e documentate per la consultazione. Tu scegli le materie, i contenuti vengono redatti e aggiornati direttamente in questo archivio.</p></div>
+       <section aria-labelledby="libraries-title"><div class="section-heading"><h2 id="libraries-title">Enciclopedie</h2><small>${plural(libraries.length,'collezione','collezioni')}</small></div>
+       <div class="library-grid">${libraries.map(en=>`<a class="library-card" href="#/enciclopedia/${encodeURIComponent(en.id)}">
+       <span class="library-icon">${ico('book')}</span><span class="library-card-title">${esc(en.name)}</span>
+       <span class="library-card-subtitle">${esc(en.description||'Un archivio della conoscenza.')}</span>
+       <span class="library-card-bottom">${plural(articleCount(en.id),'voce pubblicata','voci pubblicate')}${ico('corner')}</span></a>`).join('')}</div></section>
+       ${recent.length?`<section class="recent-section"><div class="section-heading"><h2>Ultime pubblicazioni</h2><small>${plural(db.articles.length,'voce','voci')}</small></div>
+       <div class="recent-list">${recent.map(article=>`<a href="${linkForArticle(article.id)}" class="recent-row">
+       <span class="recent-icon">${ico('file')}</span><span class="recent-details"><strong>${esc(article.title)}</strong>
+       <small>${esc(getEn(article.encyclopediaId)?.name||'')} · ${esc(article.path||'')}</small></span>
+       <span class="recent-date">${dateFmt(article.updatedAt)}</span></a>`).join('')}</div></section>`:''}`;
   }
+
   function buildTree(articles) {
     const root={children:new Map(),articles:[]};
     for(const a of articles) {
@@ -189,32 +178,31 @@
     return '#/nuova-voce/'+encodeURIComponent(enId)+'?titolo='+encodeURIComponent(title)+'&percorso='+encodeURIComponent(path);
   }
   function renderPsychologyOutline(en) {
-    const articles=getArticles(en.id),byTitle=new Map(articles.map(a=>[normalize(a.title),a]));
+    const articles=getArticles(en.id);
+    const byTitle=new Map(articles.map(a=>[normalize(a.title),a]));
     const canonical=new Map();
-    PSYCHOLOGY_INDEX.forEach(area=>area.topics.forEach(title=>{
-      const key=normalize(title);
-      if(!canonical.has(key))canonical.set(key,area.name);
-    }));
-    const completed=[...canonical.keys()].filter(key=>!!byTitle.get(key)?.content?.trim()).length;
+    PSYCHOLOGY_INDEX.forEach(area=>area.topics.forEach(title=>{const k=normalize(title);if(!canonical.has(k))canonical.set(k,area.name);}));
+    const published=[...canonical.keys()].filter(k=>byTitle.has(k)).length;
     const panels=PSYCHOLOGY_INDEX.map((area,i)=>{
-      const ready=area.topics.filter(title=>!!byTitle.get(normalize(title))?.content?.trim()).length;
+      const ready=area.topics.filter(t=>byTitle.has(normalize(t))).length;
       const rows=area.topics.map((title,j)=>{
-        const key=normalize(title),entry=byTitle.get(key),path=canonical.get(key);
-        const secondary=path!==area.name;
-        const status=entry?(entry.content?.trim()?'Scritta':'Da completare'):(secondary?'Rimando':'Da scrivere');
-        const href=entry?linkForArticle(entry.id):psychologyArticleLink(title,path,en.id);
-        return "<li><a class='psych-topic"+(entry?" is-written":"")+"' href='"+esc(href)+"'><span class='psych-topic-number'>"+(i+1)+"."+(j+1)+"</span><span class='psych-topic-title'>"+esc(title)+"</span><span class='psych-topic-status'>"+esc(status)+"</span>"+ico('chevron')+"</a></li>";
+        const article=byTitle.get(normalize(title));
+        const prefix=`<span class="psych-topic-number">${i+1}.${j+1}</span><span class="psych-topic-title">${esc(title)}</span>`;
+        return article
+          ?`<li><a class="psych-topic is-written" href="${linkForArticle(article.id)}">${prefix}<span class="psych-topic-status">Leggi</span>${ico('chevron')}</a></li>`
+          :`<li><div class="psych-topic is-pending" aria-label="${esc(title)}: in preparazione">${prefix}<span class="psych-topic-status">In preparazione</span></div></li>`;
       }).join('');
-      return "<details class='psych-area' "+(i===0?"open":"")+"><summary><span class='psych-area-number'>"+String(i+1).padStart(2,'0')+"</span><strong>"+esc(area.name)+"</strong><span class='psych-area-progress'>"+ready+" / "+area.topics.length+"</span>"+ico('chevron')+"</summary><ol class='psych-topics'>"+rows+"</ol></details>";
+      return `<details class="psych-area" ${i===0?'open':''}><summary><span class="psych-area-number">${String(i+1).padStart(2,'0')}</span><strong>${esc(area.name)}</strong><span class="psych-area-progress">${ready} / ${area.topics.length}</span>${ico('chevron')}</summary><ol class="psych-topics">${rows}</ol></details>`;
     }).join('');
     const extras=articles.filter(a=>!canonical.has(normalize(a.title)));
-    return "<section class='toc-panel psych-panel' aria-label='Indice dell’enciclopedia di Psicologia'>"+
-      "<div class='toc-heading'><h2>Indice degli argomenti</h2><span>"+PSYCHOLOGY_INDEX.length+" aree · "+canonical.size+" voci previste</span></div>"+
-      "<p class='psych-intro'>Indice di studio organizzato per ambiti disciplinari. Seleziona una voce da scrivere: l’editor si aprirà con il titolo e il percorso già compilati. Le voci salvate sono consultabili direttamente.</p>"+
-      "<p class='psych-overview'><strong>"+completed+"</strong> voci con contenuto su "+canonical.size+" previste. Gli altri titoli rappresentano argomenti pianificati, non capitoli già redatti o verificati.</p>"+
-      "<div class='psych-areas'>"+panels+"</div></section>"+
-      (extras.length?"<section class='toc-panel psych-extra'><div class='toc-heading'><h2>Altre voci</h2><span>"+extras.length+"</span></div>"+drawTree(buildTree(extras))+"</section>":"");
+    return `<section class="toc-panel psych-panel" aria-label="Indice di Psicologia">
+       <div class="toc-heading"><h2>Indice degli argomenti</h2><span>${PSYCHOLOGY_INDEX.length} aree · ${canonical.size} argomenti previsti</span></div>
+       <p class="psych-intro">L'indice distingue le voci già pubblicate dagli argomenti ancora in preparazione. I capitoli vengono redatti, verificati e pubblicati progressivamente; non devi inserire tu gli appunti.</p>
+       <p class="psych-overview"><strong>${published}</strong> voci pubblicate su ${canonical.size} argomenti previsti.</p>
+       <div class="psych-areas">${panels}</div></section>`
+       +(extras.length?`<section class="toc-panel psych-extra"><div class="toc-heading"><h2>Approfondimenti aggiuntivi</h2><span>${extras.length}</span></div>${drawTree(buildTree(extras))}</section>`:'' );
   }
+
   function searchPsychologyPlans(query) {
     const q=normalize(query);
     if(!q || !getEn('psicologia') || !PSYCHOLOGY_INDEX.length)return [];
@@ -233,24 +221,25 @@
     return out;
   }
   function renderPsychologySearchResults(plans) {
-    return "<div class='search-category'>ARGOMENTI PIANIFICATI · PSICOLOGIA</div>"+
-      plans.map(item=>"<button type='button' class='search-result' data-action='search-nav' data-href='"+esc(psychologyArticleLink(item.title,item.path))+"'><span class='result-icon'>"+ico('file-plus')+"</span><span class='result-text'><strong>"+esc(item.title)+"</strong><small>"+esc(item.path)+" · Da scrivere</small></span><span class='arrow'>"+ico('chevron')+"</span></button>").join('');
+    return "<div class='search-category'>IN PREPARAZIONE · PSICOLOGIA</div>"+
+      plans.map(item=>"<div class='search-result is-pending' aria-disabled='true'><span class='result-icon'>"+ico('file')+"</span><span class='result-text'><strong>"+esc(item.title)+"</strong><small>"+esc(item.path)+" · Non ancora pubblicato</small></span></div>").join('');
   }
 
   function renderEncyclopedia(en) {
     bread([{label:'Biblioteca',href:'#/'},{label:en.name}]);
-    const count=articleCount(en.id),root=buildTree(getArticles(en.id)),isPsychology=en.id==='psicologia'&&PSYCHOLOGY_INDEX.length>0;
+    const count=articleCount(en.id);
+    const isPsychology=en.id==='psicologia'&&PSYCHOLOGY_INDEX.length>0;
     $('#main').innerHTML=`<div class="page-header"><div>
       <p class="eyebrow">ENCICLOPEDIA</p><h1 class="display-title">${esc(en.name)}</h1>
-      <p class="description">${esc(en.description || 'La tua raccolta di voci e approfondimenti.')}</p>
-      <span class="count-pill">${plural(count,'voce','voci')}</span></div>
-      <div class="page-header-actions"><button type="button" class="secondary-button" data-action="add-article" data-id="${esc(en.id)}">${ico('plus')} Nuova voce</button>
-      <div class="menu-anchor"><button type="button" class="icon-button" aria-label="Opzioni enciclopedia" data-action="toggle-context">${ico('more')}</button>
-      <div class="dropdown" id="context-menu" role="menu" hidden><button role="menuitem" data-action="edit-encyclopedia" data-id="${esc(en.id)}">${ico('pencil')}Rinomina e descrizione</button><button role="menuitem" class="danger" data-action="delete-encyclopedia" data-id="${esc(en.id)}">${ico('trash')}Elimina enciclopedia</button></div></div></div></div>
-      ${isPsychology?renderPsychologyOutline(en):count?`<section class="toc-panel" aria-label="Indice dell'enciclopedia"><div class="toc-heading"><h2>Indice degli argomenti</h2><span>${plural(count,'voce','voci')}</span></div>${drawTree(root)}</section>`
-      :emptyBlock('La struttura parte dalla prima voce','Scrivi una voce e assegnale un percorso, ad esempio “Fondamenti / Storia”. L’indice si organizzerà automaticamente.','Scrivi la prima voce','add-article','file-plus')}`;
-    $$('[data-action="add-article"]',$('#main')).forEach(el=>el.dataset.id=en.id);
+      <p class="description">${esc(en.description||'Raccolta documentata di articoli e approfondimenti.')}</p>
+      <span class="count-pill">${plural(count,'voce pubblicata','voci pubblicate')}</span></div></div>
+      ${isPsychology?renderPsychologyOutline(en):count?`<section class="toc-panel" aria-label="Indice dell'enciclopedia">
+      <div class="toc-heading"><h2>Indice degli argomenti</h2><span>${plural(count,'voce','voci')}</span></div>
+      ${drawTree(buildTree(getArticles(en.id)))}</section>`:
+      `<section class="toc-panel"><div class="toc-heading"><h2>Contenuti in preparazione</h2></div>
+      <p class="psych-intro">Questa enciclopedia non contiene ancora voci pubblicate.</p></section>`}`;
   }
+
   function findByTitle(title,encyclopediaId) {
     const n=normalize(title);
     const local=db.articles.find(a=>a.encyclopediaId===encyclopediaId&&normalize(a.title)===n);
@@ -280,7 +269,7 @@
         const [title,...sectionBits]=destination.split('#'),section=sectionBits.join('#');
         const target=findByTitle(title.trim(),encyclopediaId);
         out+=target?`<a href="${linkForArticle(target.id,section)}" title="Apri ${esc(title.trim())}">${basicText(label)}</a>`:
-          `<a href="#" data-action="create-missing" data-title="${esc(title.trim())}" data-en="${esc(encyclopediaId)}" class="missing-link" title="Voce non ancora presente">${basicText(label)}</a>`;
+          `<span class="missing-link" title="Voce non ancora pubblicata">${basicText(label)}</span>`;
       } else if(token.startsWith('[^')) {
         const num=token.slice(2,-1);
         out+=`<a href="#" class="footnote-ref" data-scroll="fonte-${num}" aria-label="Vai alla fonte ${num}">[${num}]</a>`;
@@ -332,20 +321,18 @@
   function renderArticle(article) {
     const en=getEn(article.encyclopediaId),{html,toc}=renderMarkdown(article.content,article.encyclopediaId);
     bread([{label:'Biblioteca',href:'#/'},{label:en?.name||'Enciclopedia',href:`#/enciclopedia/${encodeURIComponent(article.encyclopediaId)}`},{label:article.title}]);
-    $('#main').innerHTML=`<div class="article-top-actions"><span class="label">${esc(en?.name||'')}</span><div style="display:flex;align-items:center;gap:8px"><button class="secondary-button" type="button" data-action="edit-article" data-id="${esc(article.id)}">${ico('pencil')} Modifica</button>
-      <div class="menu-anchor"><button type="button" class="icon-button" aria-label="Opzioni voce" data-action="toggle-context">${ico('more')}</button>
-      <div class="dropdown" id="context-menu" role="menu" hidden><button type="button" role="menuitem" class="danger" data-action="delete-article" data-id="${esc(article.id)}">${ico('trash')}Elimina voce</button></div></div></div></div>
+    $('#main').innerHTML=`<div class="article-top-actions"><span class="label">${esc(en?.name||'')}</span></div>
       <div class="article-layout ${toc.length?'':'no-aside'}"><article class="article-main">
         ${article.path?`<p class="article-path">${esc(article.path.split('/').map(x=>x.trim()).join(' / '))}</p>`:''}
         <h1 class="article-title">${esc(article.title)}</h1>
         ${article.summary?`<p class="article-summary">${esc(article.summary)}</p>`:''}
         <div class="article-meta"><span>Aggiornata il ${dateFmt(article.updatedAt)}</span><span class="bullet">·</span><span>${plural(article.sources.length,'fonte','fonti')}</span></div>
-        <hr class="article-divider">
-        <div class="article-body">${html||'<p style="color:#9ca9a0">Questa voce non contiene ancora testo.</p>'}</div>
+        <hr class="article-divider"><div class="article-body">${html||'<p>Contenuto in preparazione.</p>'}</div>
         ${sourcesHtml(article.sources)}
-      </article>${toc.length?`<aside class="article-toc" aria-label="Indice della voce"><h3>IN QUESTA VOCE</h3>${toc.map(item=>
-        `<a href="#" data-scroll="${esc(item.id)}" class="level-${item.level}">${esc(item.text)}</a>`).join('')}</aside>`:''}</div>`;
+      </article>${toc.length?`<aside class="article-toc" aria-label="Indice della voce"><h3>IN QUESTA VOCE</h3>
+      ${toc.map(item=>`<a href="#" data-scroll="${esc(item.id)}" class="level-${item.level}">${esc(item.text)}</a>`).join('')}</aside>`:''}</div>`;
   }
+
   function readDraft(key) {
     try{const all=JSON.parse(readLocal(DRAFTS)||'{}');return all[key]||null;}catch{return null;}
   }
@@ -554,7 +541,7 @@
   function updateSearch(query) {
     const {encyclopedias,articles}=searchAll(query);
     const plans=searchPsychologyPlans(query);
-    $('#search-results').innerHTML=`${!encyclopedias.length&&!articles.length&&!plans.length?'<div class="search-no-results">Nessun risultato trovato.<br>Puoi creare una nuova voce dall’archivio.</div>':''}
+    $('#search-results').innerHTML=`${!encyclopedias.length&&!articles.length&&!plans.length?'<div class="search-no-results">Nessun risultato pubblicato trovato.</div>':''}
       ${encyclopedias.length?`<div class="search-category">ENCICLOPEDIE</div>${encyclopedias.map(e=>`<button class="search-result" data-action="search-nav" data-href="#/enciclopedia/${encodeURIComponent(e.id)}"><span class="result-icon">${ico('book')}</span><span class="result-text"><strong>${esc(e.name)}</strong><small>${plural(articleCount(e.id),'voce','voci')}</small></span><span class="arrow">${ico('chevron')}</span></button>`).join('')}`:''}
       ${articles.length?`<div class="search-category">VOCI</div>${articles.map(a=>`<button class="search-result" data-action="search-nav" data-href="${linkForArticle(a.id)}"><span class="result-icon">${ico('file')}</span><span class="result-text"><strong>${esc(a.title)}</strong><small>${esc(getEn(a.encyclopediaId)?.name||'')}${a.path?' · '+esc(a.path):''}</small></span><span class="arrow">${ico('chevron')}</span></button>`).join('')}`:''}`;
     if(plans.length)$('#search-results').insertAdjacentHTML('beforeend',renderPsychologySearchResults(plans));
@@ -567,17 +554,24 @@
   function render() {
     const route=getRoute();
     renderSidebar(route);
-    if(route.type==='home'){editor=null;renderHome();}
-    else if(route.type==='enciclopedia'){editor=null;const en=getEn(route.id);if(en)renderEncyclopedia(en);else{location.hash='#/';renderHome();}}
-    else if(route.type==='voce'){editor=null;const a=getArt(route.id);if(a)renderArticle(a);else{location.hash='#/';renderHome();}}
-    else if(route.type==='modifica'){const a=getArt(route.id);if(a)renderEditor(a,a.encyclopediaId,route);else{location.hash='#/';renderHome();}}
-    else if(route.type==='nuova-voce'){if(getEn(route.id))renderEditor(null,route.id,route);else{location.hash='#/';renderHome();}}
-    else{location.hash='#/';renderHome();}
+    if(route.type==='home')renderHome();
+    else if(route.type==='enciclopedia') {
+      const en=getEn(route.id);
+      if(en)renderEncyclopedia(en); else {location.hash='#/';renderHome();}
+    } else if(route.type==='voce') {
+      const article=getArt(route.id);
+      if(article)renderArticle(article); else {location.hash='#/';renderHome();}
+    } else {
+      location.hash='#/';
+      renderHome();
+    }
+    editor=null;
     closeMenus();hydrateIcons($('#main'));
     const key=`${route.type}/${route.id}`;
     if(lastRouteKey!==key){lastRouteKey=key;window.scrollTo({top:0,behavior:'instant'});}
     if(route.section)requestAnimationFrame(()=>jumpToSection(route.section));
   }
+
   function clickAction(e) {
     const scroll=e.target.closest('[data-scroll]');
     if(scroll){e.preventDefault();jumpToSection(scroll.dataset.scroll);return;}
@@ -585,6 +579,7 @@
     if(anchor){e.preventDefault();go(anchor.getAttribute('href'));return;}
     const node=e.target.closest('[data-action]');if(!node)return;
     const action=node.dataset.action;
+    if(!['toggle-sidebar','open-search','close-modal','search-nav'].includes(action))return;
     if(node.tagName==='A')e.preventDefault();
     if(action==='toggle-sidebar'){
       const open=!$('#sidebar').classList.contains('open');$('#sidebar').classList.toggle('open',open);$('#mobile-shade').hidden=!open;
@@ -647,7 +642,7 @@
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();showSearch();return;}
     if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='s'&&editor){e.preventDefault();if(!editor.preview)editor.values=editorValues();saveArticle();return;}
     if(e.key==='Escape'){if($('#overlay-root').innerHTML)closeModal();else if($('#sidebar').classList.contains('open'))closeMobile();else closeMenus();return;}
-    if(e.key==='Enter'&&e.target.id==='search-input'){e.preventDefault();const first=$('.search-result');if(first){closeModal();go(first.dataset.href);}return;}
+    if(e.key==='Enter'&&e.target.id==='search-input'){e.preventDefault();const first=$('.search-result[data-href]');if(first){closeModal();go(first.dataset.href);}return;}
     if(e.key==='Tab'&&$('#app-overlay')){
       const focusable=$$('button:not([disabled]),input:not([disabled]),select:not([disabled]),textarea:not([disabled]),a[href]', $('#app-overlay')).filter(el=>el.offsetParent!==null);
       if(focusable.length){const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}
