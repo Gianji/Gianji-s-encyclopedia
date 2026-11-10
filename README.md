@@ -1,10 +1,21 @@
-# ENCICLOPEDIA — Versione 1.0
+# ENCICLOPEDIA — Versione 1.1
 
 Prototipo **funzionante**, senza framework, server, account o dipendenze esterne. Interfaccia in italiano, responsive per computer, tablet e smartphone.
 
 ## Avvio
 
-Apri `index.html` con un browser moderno. Per pubblicarlo online, carica `index.html`, `styles.css` e `app.js` nella stessa cartella di un hosting statico, per esempio GitHub Pages.
+Apri `index.html` con un browser moderno. Per pubblicarlo online, carica `index.html`, `styles.css`, `psicologia-data.js` e `app.js` nella stessa cartella di un hosting statico, per esempio GitHub Pages.
+
+## Prima enciclopedia: Psicologia
+
+La prima enciclopedia è **Psicologia**, con un indice editoriale derivato dai titoli della struttura di studio: **11 aree tematiche, 323 posizioni nell'indice e 322 argomenti distinti**. La sezione «Psicologia» di OneNote conteneva anche una pagina generale «TOPICS», che non è stata conteggiata come area disciplinare.
+
+- Aprendo Psicologia si trova l'indice, con aree espandibili e numerazione per capitoli.
+- Selezionando un titolo «Da scrivere», si apre una nuova voce con titolo e percorso precompilati.
+- Le voci effettivamente salvate diventano accessibili dall'indice; le voci fuori dall'indice restano sotto «Altre voci».
+- La ricerca globale include anche i titoli pianificati, distinguendoli dalle voci già salvate.
+- Se un argomento compare in più aree, è previsto un unico contenuto canonico, con rimandi dalle altre sezioni.
+- I titoli pianificati **non sono capitoli già scritti o verificati**. Nessun testo preesistente del quaderno OneNote viene pubblicato automaticamente.
 
 ## Funzioni disponibili
 
