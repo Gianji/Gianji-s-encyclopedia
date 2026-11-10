@@ -11,6 +11,7 @@ Il sito serve per **consultare** i materiali pubblicati: biblioteca, indici, cap
 ## Organizzazione dei contenuti
 
 - `psicologia-data.js`: indice editoriale pianificato dell'enciclopedia Psicologia, con 11 aree disciplinari e oltre 300 argomenti distinti.
+- `psicologia-introduzione.js`: panoramica autonoma su oggetto, metodi e campi della psicologia.
 - `psicologia-origini.js`: quattro ulteriori voci storiche, caricate dopo la base, con ID e fonti indipendenti.
 - `contenuti.js`: **testi effettivamente pubblicati** con ID stabili, titolo, percorso, sintesi, corpo in formato Markdown, fonti e data di aggiornamento.
 - `app.js`: navigazione, ricerca, resa dei capitoli e bibliografia in modalità lettura.
@@ -20,12 +21,13 @@ La presenza di un argomento nell'indice **non** implica che sia stato scritto, v
 
 ## Contenuti iniziali pubblicati
 
-1. *Storia della Psicologia: dalle Origini Filosofiche alla Nascita della Scienza*.
-2. *Wundt e la Fondazione della Psicologia Sperimentale*.
-3. *Strutturalismo*.
-4. *Funzionalismo*.
-5. *Gestalt e Psicologia della Forma*.
-6. *Comportamentismo Classico e Neocomportamentismo*.
+1. *Psicologia: Oggetto, Metodi e Campi di Studio*.
+2. *Storia della Psicologia: dalle Origini Filosofiche alla Nascita della Scienza*.
+3. *Wundt e la Fondazione della Psicologia Sperimentale*.
+4. *Strutturalismo*.
+5. *Funzionalismo*.
+6. *Gestalt e Psicologia della Forma*.
+7. *Comportamentismo Classico e Neocomportamentismo*.
 
 Si tratta di **prime stesure**, non di capitoli dichiarati esaustivi. Il progetto enciclopedico richiede ampliamenti, verifiche ulteriori e pubblicazioni progressive.
 
