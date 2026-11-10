@@ -327,3 +327,13 @@ kbd{font-family:inherit;background:#f5f7f4;border:1px solid #e8ece7;border-radiu
 .search-result.is-pending{cursor:default;opacity:.67}
 .search-result.is-pending:hover{background:transparent}
 .article-body .missing-link{color:var(--muted);border-bottom:1px dotted var(--line-strong);cursor:default}
+
+/* Progresso editoriale discreto: stima parole lessicali, senza modificare la navigazione. */
+.psych-word-stat{display:flex;flex-direction:column;gap:6px;margin:10px 0 20px;padding:0 2px;color:var(--muted);font-size:12px}
+.psych-word-stat strong{font-variant-numeric:tabular-nums;color:var(--ink);font-weight:750;font-size:15px}
+.psych-word-stat span{color:var(--faint)}
+.psych-word-stat small{color:var(--muted);font-size:11px}
+.psych-progress{display:block;width:100%;height:4px;appearance:none;border:none;border-radius:20px;overflow:hidden;background:var(--line)}
+.psych-progress::-webkit-progress-bar{background:var(--line)}
+.psych-progress::-webkit-progress-value{background:var(--accent);border-radius:20px}
+.psych-progress::-moz-progress-bar{background:var(--accent);border-radius:20px}
