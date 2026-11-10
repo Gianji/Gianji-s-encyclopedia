@@ -171,7 +171,7 @@
        <div class="library-grid">${libraries.map(en=>`<a class="library-card" href="#/enciclopedia/${encodeURIComponent(en.id)}">
        <span class="library-icon">${ico('book')}</span><span class="library-card-title">${esc(en.name)}</span>
        <span class="library-card-subtitle">${esc(en.description||'Un archivio della conoscenza.')}</span>
-       <span class="library-card-bottom">${plural(articleCount(en.id),'voce pubblicata','voci pubblicate')}${ico('corner')}</span></a>`).join('')}</div></section>
+       <span class="library-card-bottom">${en.id==='psicologia'?plural(articleCount(en.id),'bozza consultabile','bozze consultabili'):plural(articleCount(en.id),'voce pubblicata','voci pubblicate')}${ico('corner')}</span></a>`).join('')}</div></section>
        ${recent.length?`<section class="recent-section"><div class="section-heading"><h2>Ultime pubblicazioni</h2><small>${plural(db.articles.length,'voce','voci')}</small></div>
        <div class="recent-list">${recent.map(article=>`<a href="${linkForArticle(article.id)}" class="recent-row">
        <span class="recent-icon">${ico('file')}</span><span class="recent-details"><strong>${esc(article.title)}</strong>
@@ -268,7 +268,7 @@
     $('#main').innerHTML=`<div class="page-header"><div>
       <p class="eyebrow">ENCICLOPEDIA</p><h1 class="display-title">${esc(en.name)}</h1>
       <p class="description">${esc(en.description||'Raccolta documentata di articoli e approfondimenti.')}</p>
-      <span class="count-pill">${plural(count,'voce pubblicata','voci pubblicate')}</span></div></div>
+      <span class="count-pill">${en.id==='psicologia'?`${count} bozze consultabili · ${countBookStatus(getArticles(en.id))} completi` : plural(count,'voce pubblicata','voci pubblicate')}</span></div></div>
       ${isPsychology?renderPsychologyOutline(en):count?`<section class="toc-panel" aria-label="Indice dell'enciclopedia">
       <div class="toc-heading"><h2>Indice degli argomenti</h2><span>${plural(count,'voce','voci')}</span></div>
       ${drawTree(buildTree(getArticles(en.id)))}</section>`:
