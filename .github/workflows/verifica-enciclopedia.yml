@@ -1,0 +1,17 @@
+name: Verifica editoriale ENCICLOPEDIA
+on:
+  push:
+    branches: [main]
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Controllo struttura, riferimenti e soglie di completezza
+        run: node scripts/verifica-volumi.mjs
