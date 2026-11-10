@@ -5,6 +5,7 @@
   'use strict';
 
   const STORE = 'enciclopedia.archive.v1';
+  const PSYCHOLOGY_INDEX = Array.isArray(window.PSICOLOGIA_INDICE) ? window.PSICOLOGIA_INDICE : [];
   const DRAFTS = 'enciclopedia.drafts.v1';
   const $ = (s, root = document) => root.querySelector(s);
   const $$ = (s, root = document) => [...root.querySelectorAll(s)];
@@ -60,14 +61,21 @@
   const plural = (count, singular, pluralWord) => `${count} ${count === 1 ? singular : pluralWord}`;
   function initialData() {
     return {version:1, encyclopedias:[{
-      id:'psicologia',name:'Psicologia',description:'Uno spazio da costruire: fondamenti, scuole, autori e concetti.',createdAt:now(),updatedAt:now()
+      id:'psicologia',name:'Psicologia',description:'Studio scientifico della mente, del comportamento e delle relazioni: dalla storia alle applicazioni.',createdAt:now(),updatedAt:now()
     }],articles:[]};
   }
   function readLocal(key) {try{return localStorage.getItem(key);}catch{return null;}}
   function writeLocal(key, value) {try{localStorage.setItem(key,value);return true;}catch{return false;}}
   function loadDb() {
     const raw = readLocal(STORE);
-    if (raw) {try {const d=JSON.parse(raw);if(d&&d.version===1&&Array.isArray(d.encyclopedias)&&Array.isArray(d.articles)) return d;}catch{}}
+    if (raw) {try {const d=JSON.parse(raw);if(d&&d.version===1&&Array.isArray(d.encyclopedias)&&Array.isArray(d.articles)) {
+      const psych=d.encyclopedias.find(e=>e.id==='psicologia');
+      if(psych && psych.description==='Uno spazio da costruire: fondamenti, scuole, autori e concetti.') {
+        psych.description='Studio scientifico della mente, del comportamento e delle relazioni: dalla storia alle applicazioni.';
+        writeLocal(STORE,JSON.stringify(d));
+      }
+      return d;
+    }}catch{}}
     const initial=initialData();writeLocal(STORE,JSON.stringify(initial));return initial;
   }
   let db = loadDb();
@@ -97,7 +105,7 @@
     const hash=(location.hash||'#/').slice(1), clean=hash.split('?')[0];
     const parts=clean.split('/').filter(Boolean).map(part=>{try{return decodeURIComponent(part);}catch{return part;}});
     const searchParams=new URLSearchParams(hash.includes('?') ? hash.slice(hash.indexOf('?')+1):'');
-    return {type:parts[0]||'home',id:parts[1]||'',section:searchParams.get('sezione')||''};
+    return {type:parts[0]||'home',id:parts[1]||'',section:searchParams.get('sezione')||'',title:searchParams.get('titolo')||'',path:searchParams.get('percorso')||''};
   }
   function routeId(route) {
     if(route.type==='enciclopedia'||route.type==='nuova-voce')return route.id;
@@ -145,7 +153,7 @@
       ${libraries.length?`<div class="library-grid">${libraries.map(en=>`<a class="library-card" href="#/enciclopedia/${encodeURIComponent(en.id)}">
         <span class="library-icon">${ico('book')}</span><span class="library-card-title">${esc(en.name)}</span>
         <span class="library-card-subtitle">${esc(en.description||'Una collezione di conoscenze.')}</span>
-        <span class="library-card-bottom">${plural(articleCount(en.id),'voce','voci')}${ico('corner')}</span>
+        <span class="library-card-bottom">${en.id==='psicologia'&&PSYCHOLOGY_INDEX.length?plural(psychologyPlanCount(),'argomento','argomenti'):plural(articleCount(en.id),'voce','voci')}${ico('corner')}</span>
       </a>`).join('')}</div>`:emptyBlock('Inizia da una materia','Crea la tua prima enciclopedia. Potrai aggiungere argomenti, capitoli e voci in qualsiasi momento.','Crea enciclopedia','create-encyclopedia','book')}
       </section>
       ${recent.length?`<section class="recent-section" aria-labelledby="recent-title"><div class="section-heading"><h2 id="recent-title">Ultime modifiche</h2><small>${plural(db.articles.length,'voce totale','voci totali')}</small></div>
@@ -172,9 +180,66 @@
       ${articles.map(a=>`<li class="topic-leaf"><a href="${linkForArticle(a.id)}">${ico('file')}<span>${esc(a.title)}</span><span class="leaf-arrow">${ico('chevron')}</span></a></li>`).join('')}
     </ul>`;
   }
+
+  // Indice editoriale: i titoli programmati non diventano voci pubblicate finché non sono salvati.
+  function psychologyPlanCount() {
+    return new Set(PSYCHOLOGY_INDEX.flatMap(area=>area.topics.map(normalize))).size;
+  }
+  function psychologyArticleLink(title,path,enId='psicologia') {
+    return '#/nuova-voce/'+encodeURIComponent(enId)+'?titolo='+encodeURIComponent(title)+'&percorso='+encodeURIComponent(path);
+  }
+  function renderPsychologyOutline(en) {
+    const articles=getArticles(en.id),byTitle=new Map(articles.map(a=>[normalize(a.title),a]));
+    const canonical=new Map();
+    PSYCHOLOGY_INDEX.forEach(area=>area.topics.forEach(title=>{
+      const key=normalize(title);
+      if(!canonical.has(key))canonical.set(key,area.name);
+    }));
+    const completed=[...canonical.keys()].filter(key=>!!byTitle.get(key)?.content?.trim()).length;
+    const panels=PSYCHOLOGY_INDEX.map((area,i)=>{
+      const ready=area.topics.filter(title=>!!byTitle.get(normalize(title))?.content?.trim()).length;
+      const rows=area.topics.map((title,j)=>{
+        const key=normalize(title),entry=byTitle.get(key),path=canonical.get(key);
+        const secondary=path!==area.name;
+        const status=entry?(entry.content?.trim()?'Scritta':'Da completare'):(secondary?'Rimando':'Da scrivere');
+        const href=entry?linkForArticle(entry.id):psychologyArticleLink(title,path,en.id);
+        return "<li><a class='psych-topic"+(entry?" is-written":"")+"' href='"+esc(href)+"'><span class='psych-topic-number'>"+(i+1)+"."+(j+1)+"</span><span class='psych-topic-title'>"+esc(title)+"</span><span class='psych-topic-status'>"+esc(status)+"</span>"+ico('chevron')+"</a></li>";
+      }).join('');
+      return "<details class='psych-area' "+(i===0?"open":"")+"><summary><span class='psych-area-number'>"+String(i+1).padStart(2,'0')+"</span><strong>"+esc(area.name)+"</strong><span class='psych-area-progress'>"+ready+" / "+area.topics.length+"</span>"+ico('chevron')+"</summary><ol class='psych-topics'>"+rows+"</ol></details>";
+    }).join('');
+    const extras=articles.filter(a=>!canonical.has(normalize(a.title)));
+    return "<section class='toc-panel psych-panel' aria-label='Indice dell’enciclopedia di Psicologia'>"+
+      "<div class='toc-heading'><h2>Indice degli argomenti</h2><span>"+PSYCHOLOGY_INDEX.length+" aree · "+canonical.size+" voci previste</span></div>"+
+      "<p class='psych-intro'>Indice di studio organizzato per ambiti disciplinari. Seleziona una voce da scrivere: l’editor si aprirà con il titolo e il percorso già compilati. Le voci salvate sono consultabili direttamente.</p>"+
+      "<p class='psych-overview'><strong>"+completed+"</strong> voci con contenuto su "+canonical.size+" previste. Gli altri titoli rappresentano argomenti pianificati, non capitoli già redatti o verificati.</p>"+
+      "<div class='psych-areas'>"+panels+"</div></section>"+
+      (extras.length?"<section class='toc-panel psych-extra'><div class='toc-heading'><h2>Altre voci</h2><span>"+extras.length+"</span></div>"+drawTree(buildTree(extras))+"</section>":"");
+  }
+  function searchPsychologyPlans(query) {
+    const q=normalize(query);
+    if(!q || !getEn('psicologia') || !PSYCHOLOGY_INDEX.length)return [];
+    const recorded=new Set(getArticles('psicologia').map(a=>normalize(a.title)));
+    const seen=new Set(),out=[];
+    for(const area of PSYCHOLOGY_INDEX) {
+      for(const title of area.topics) {
+        const key=normalize(title);
+        if(seen.has(key))continue;
+        seen.add(key);
+        if(recorded.has(key) || !(key.includes(q)||normalize(area.name).includes(q)))continue;
+        out.push({title,path:area.name});
+        if(out.length===25)return out;
+      }
+    }
+    return out;
+  }
+  function renderPsychologySearchResults(plans) {
+    return "<div class='search-category'>ARGOMENTI PIANIFICATI · PSICOLOGIA</div>"+
+      plans.map(item=>"<button type='button' class='search-result' data-action='search-nav' data-href='"+esc(psychologyArticleLink(item.title,item.path))+"'><span class='result-icon'>"+ico('file-plus')+"</span><span class='result-text'><strong>"+esc(item.title)+"</strong><small>"+esc(item.path)+" · Da scrivere</small></span><span class='arrow'>"+ico('chevron')+"</span></button>").join('');
+  }
+
   function renderEncyclopedia(en) {
     bread([{label:'Biblioteca',href:'#/'},{label:en.name}]);
-    const count=articleCount(en.id),root=buildTree(getArticles(en.id));
+    const count=articleCount(en.id),root=buildTree(getArticles(en.id)),isPsychology=en.id==='psicologia'&&PSYCHOLOGY_INDEX.length>0;
     $('#main').innerHTML=`<div class="page-header"><div>
       <p class="eyebrow">ENCICLOPEDIA</p><h1 class="display-title">${esc(en.name)}</h1>
       <p class="description">${esc(en.description || 'La tua raccolta di voci e approfondimenti.')}</p>
@@ -182,7 +247,7 @@
       <div class="page-header-actions"><button type="button" class="secondary-button" data-action="add-article" data-id="${esc(en.id)}">${ico('plus')} Nuova voce</button>
       <div class="menu-anchor"><button type="button" class="icon-button" aria-label="Opzioni enciclopedia" data-action="toggle-context">${ico('more')}</button>
       <div class="dropdown" id="context-menu" role="menu" hidden><button role="menuitem" data-action="edit-encyclopedia" data-id="${esc(en.id)}">${ico('pencil')}Rinomina e descrizione</button><button role="menuitem" class="danger" data-action="delete-encyclopedia" data-id="${esc(en.id)}">${ico('trash')}Elimina enciclopedia</button></div></div></div></div>
-      ${count?`<section class="toc-panel" aria-label="Indice dell'enciclopedia"><div class="toc-heading"><h2>Indice degli argomenti</h2><span>${plural(count,'voce','voci')}</span></div>${drawTree(root)}</section>`
+      ${isPsychology?renderPsychologyOutline(en):count?`<section class="toc-panel" aria-label="Indice dell'enciclopedia"><div class="toc-heading"><h2>Indice degli argomenti</h2><span>${plural(count,'voce','voci')}</span></div>${drawTree(root)}</section>`
       :emptyBlock('La struttura parte dalla prima voce','Scrivi una voce e assegnale un percorso, ad esempio “Fondamenti / Storia”. L’indice si organizzerà automaticamente.','Scrivi la prima voce','add-article','file-plus')}`;
     $$('[data-action="add-article"]',$('#main')).forEach(el=>el.dataset.id=en.id);
   }
@@ -294,9 +359,9 @@
     return {title:$('#field-title')?.value||'',path:$('#field-path')?.value||'',summary:$('#field-summary')?.value||'',content:$('#field-content')?.value||'',sources:$('#field-sources')?.value||'',encyclopediaId:$('#field-encyclopedia')?.value||editor?.encyclopediaId||''};
   }
   function initEditor(article,enId,route) {
-    const key=article?`edit-${article.id}`:`new-${enId}`;
+    const key=article?`edit-${article.id}`:route?.title?`new-${enId}-${slug(route.title)}`:`new-${enId}`;
     if(editor?.key===key)return;
-    const fallback=article?{title:article.title,path:article.path,summary:article.summary,content:article.content,sources:article.sources.join('\n'),encyclopediaId:article.encyclopediaId}:{title:'',path:'',summary:'',content:'',sources:'',encyclopediaId:enId};
+    const fallback=article?{title:article.title,path:article.path,summary:article.summary,content:article.content,sources:article.sources.join('\n'),encyclopediaId:article.encyclopediaId}:{title:route?.title||'',path:route?.path||'',summary:'',content:'',sources:'',encyclopediaId:enId};
     const stored=readDraft(key);
     editor={key,articleId:article?.id||'',encyclopediaId:enId,values:stored||fallback,dirty:!!stored,preview:false};
   }
@@ -488,9 +553,11 @@
   }
   function updateSearch(query) {
     const {encyclopedias,articles}=searchAll(query);
-    $('#search-results').innerHTML=`${!encyclopedias.length&&!articles.length?'<div class="search-no-results">Nessun risultato trovato.<br>Puoi creare una nuova voce dall’archivio.</div>':''}
+    const plans=searchPsychologyPlans(query);
+    $('#search-results').innerHTML=`${!encyclopedias.length&&!articles.length&&!plans.length?'<div class="search-no-results">Nessun risultato trovato.<br>Puoi creare una nuova voce dall’archivio.</div>':''}
       ${encyclopedias.length?`<div class="search-category">ENCICLOPEDIE</div>${encyclopedias.map(e=>`<button class="search-result" data-action="search-nav" data-href="#/enciclopedia/${encodeURIComponent(e.id)}"><span class="result-icon">${ico('book')}</span><span class="result-text"><strong>${esc(e.name)}</strong><small>${plural(articleCount(e.id),'voce','voci')}</small></span><span class="arrow">${ico('chevron')}</span></button>`).join('')}`:''}
       ${articles.length?`<div class="search-category">VOCI</div>${articles.map(a=>`<button class="search-result" data-action="search-nav" data-href="${linkForArticle(a.id)}"><span class="result-icon">${ico('file')}</span><span class="result-text"><strong>${esc(a.title)}</strong><small>${esc(getEn(a.encyclopediaId)?.name||'')}${a.path?' · '+esc(a.path):''}</small></span><span class="arrow">${ico('chevron')}</span></button>`).join('')}`:''}`;
+    if(plans.length)$('#search-results').insertAdjacentHTML('beforeend',renderPsychologySearchResults(plans));
   }
   function jumpToSection(section) {
     if(!section)return;
